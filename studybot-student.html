@@ -1819,5 +1819,24 @@ function speakCallText(text) {
 }
 
 </script>
+
+<!-- VOICE CALL OVERLAY -->
+<div id="call-overlay" style="display:none;position:fixed;inset:0;background:linear-gradient(135deg,#0f0b2e,#1e1b4b,#312e81);z-index:500;align-items:center;justify-content:center;flex-direction:column;padding:24px 16px;">
+  <div id="call-avatar" style="width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:46px;margin-bottom:16px;box-shadow:0 0 0 0 rgba(99,102,241,.5);animation:callpulse 2s infinite">🤖</div>
+  <div id="call-status" style="color:#fff;font-size:19px;font-weight:800;margin-bottom:6px">StudyBot AI</div>
+  <div id="call-sub" style="color:rgba(255,255,255,.55);font-size:13px;margin-bottom:20px;text-align:center">Tap 🎤 to speak</div>
+  <div id="call-transcript" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:14px 18px;width:100%;max-width:480px;min-height:56px;color:#fff;font-size:14px;line-height:1.7;margin-bottom:24px;text-align:center">Tap the mic and speak your question!</div>
+  <div style="display:flex;gap:18px;align-items:center">
+    <button id="call-mute-btn" onclick="toggleCallMute()" style="width:56px;height:56px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:22px;cursor:pointer">🔇</button>
+    <button id="call-mic-btn" onclick="toggleCallMic()" style="width:68px;height:68px;border-radius:50%;border:none;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;font-size:28px;cursor:pointer;box-shadow:0 6px 20px rgba(99,102,241,.5)">🎤</button>
+    <button onclick="endCall()" style="width:56px;height:56px;border-radius:50%;border:none;background:#ef4444;color:#fff;font-size:22px;cursor:pointer">📵</button>
+  </div>
+</div>
+<style>
+@keyframes callpulse{0%{box-shadow:0 0 0 0 rgba(99,102,241,.5);}70%{box-shadow:0 0 0 24px rgba(99,102,241,0);}100%{box-shadow:0 0 0 0 rgba(99,102,241,0);}}
+#call-overlay.active{display:flex!important;}
+#call-mic-btn.listening{background:linear-gradient(135deg,#ef4444,#dc2626)!important;animation:callpulse 1s infinite!important;}
+</style>
+
 </body>
 </html>
