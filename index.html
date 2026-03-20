@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>StudyBot AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e1b4b,#4338ca,#7c3aed);padding:20px;}
+.card{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:28px;padding:36px 28px;width:100%;max-width:480px;text-align:center;backdrop-filter:blur(20px);}
+.logo{font-size:52px;margin-bottom:12px;}
+h1{color:#fff;font-size:26px;font-weight:900;margin-bottom:6px;}
+p{color:rgba(255,255,255,.6);font-size:14px;margin-bottom:28px;line-height:1.6;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.btn{background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);border-radius:20px;padding:20px 12px;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.btn:hover,.btn:active{border-color:#a78bfa;background:rgba(167,139,250,.2);transform:translateY(-2px);}
+.ic{font-size:36px;}
+.nm{color:#fff;font-weight:800;font-size:15px;}
+.ds{color:rgba(255,255,255,.5);font-size:11px;}
+
+/* Mobile */
+@media(max-width:480px){
+  body{padding:16px;align-items:flex-start;padding-top:40px;}
+  .card{padding:28px 20px;border-radius:24px;}
+  h1{font-size:22px;}
+  .logo{font-size:44px;}
+  .grid{gap:12px;}
+  .btn{padding:18px 10px;border-radius:16px;}
+  .ic{font-size:32px;}
+  .nm{font-size:14px;}
+  .ds{font-size:10px;}
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🤖</div>
+  <h1>StudyBot AI</h1>
+  <p>India's Smartest Learning Platform<br/>Select your role to continue</p>
+  <div class="grid">
+    <a class="btn" href="studybot-student.html">
+      <span class="ic">👨‍🎓</span>
+      <div class="nm">Student</div>
+      <div class="ds">Learn &amp; grow</div>
+    </a>
+    <a class="btn" href="studybot-teacher.html">
+      <span class="ic">👨‍🏫</span>
+      <div class="nm">Teacher</div>
+      <div class="ds">Manage class</div>
+    </a>
+    <a class="btn" href="studybot-parent.html">
+      <span class="ic">👨‍👩‍👧</span>
+      <div class="nm">Parent</div>
+      <div class="ds">Track child</div>
+    </a>
+    <a class="btn" href="studybot-admin.html">
+      <span class="ic">🛡️</span>
+      <div class="nm">Admin</div>
+      <div class="ds">Manage platform</div>
+    </a>
+  </div>
+</div>
+</body>
+</html>

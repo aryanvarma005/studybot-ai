@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>StudyBot AI — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0f0f1a;--surface:#1a1a2e;--surface2:#16213e;--border:#2a2a4a;--primary:#6366f1;--primary-light:#1e1b4b;--green:#10b981;--green-dark:#065f46;--red:#ef4444;--red-dark:#7f1d1d;--amber:#f59e0b;--amber-dark:#78350f;--cyan:#06b6d4;--purple:#7c3aed;--gold:#fbbf24;--text:#f1f5f9;--muted:#94a3b8;--radius:14px;--shadow:0 8px 32px rgba(0,0,0,.4);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.4);}70%{box-shadow:0 0 0 10px rgba(99,102,241,0);}}
+
+/* LOGIN */
+#screen-login{align-items:center;justify-content:center;background:radial-gradient(ellipse at top,#1e1b4b 0%,#0f0f1a 60%);}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px 36px;width:440px;box-shadow:0 32px 80px rgba(0,0,0,.6);animation:slideUp .5s ease both;margin:auto;position:relative;overflow:hidden;}
+.login-card::before{content:'';position:absolute;top:-80px;right:-80px;width:200px;height:200px;background:radial-gradient(circle,rgba(99,102,241,.15),transparent 70%);pointer-events:none;}
+.login-badge{display:inline-flex;align-items:center;gap:7px;background:var(--primary-light);border:1px solid rgba(99,102,241,.3);color:var(--primary);border-radius:99px;padding:5px 13px;font-size:11px;font-weight:800;margin-bottom:20px;letter-spacing:.3px;}
+.login-title{font-size:28px;font-weight:900;margin-bottom:5px;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6;}
+.inp label{display:block;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;}
+.inp{margin-bottom:14px;}
+.inp input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border .2s,background .2s;background:var(--surface2);}
+.inp input:focus{border-color:var(--primary);background:#1e1b4b;}
+.btn-login{width:100%;padding:13px;background:linear-gradient(135deg,var(--primary),var(--purple));border:none;border-radius:10px;color:#fff;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(99,102,241,.4);animation:pulse2 3s infinite;transition:transform .15s;}
+.btn-login:hover{transform:translateY(-1px);}
+.btn-login:disabled{opacity:.5;cursor:not-allowed;animation:none;}
+.login-msg{text-align:center;margin-top:10px;font-size:13px;font-weight:700;color:var(--red);}
+.demo-note{text-align:center;margin-top:8px;font-size:11px;color:var(--muted);}
+.access-levels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:22px;}
+.al-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);}
+.al-item span{display:block;font-size:18px;margin-bottom:4px;}
+
+/* LAYOUT */
+#screen-dash{flex-direction:row;}
+.sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:18px 10px;flex-shrink:0;min-height:100vh;}
+.sb-logo{display:flex;align-items:center;gap:9px;padding:0 7px;margin-bottom:5px;}
+.sq{width:34px;height:34px;background:linear-gradient(135deg,var(--primary),var(--purple));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.sb-logo-txt{font-size:16px;font-weight:900;}.sb-logo-txt span{color:var(--primary);}
+.sb-badge{display:inline-flex;align-items:center;gap:5px;background:var(--primary-light);border:1px solid rgba(99,102,241,.2);color:var(--primary);border-radius:99px;padding:3px 10px;font-size:10px;font-weight:800;margin:7px 7px 16px;letter-spacing:.3px;}
+.nav-sec{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:0 7px;margin:11px 0 3px;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:9px 7px;border-radius:9px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:700;transition:all .15s;margin-bottom:1px;}
+.nav-item:hover{background:var(--primary-light);color:var(--text);}
+.nav-item.active{background:var(--primary-light);color:var(--primary);border:1px solid rgba(99,102,241,.2);}
+.nav-ic{font-size:15px;width:19px;text-align:center;}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:99px;font-size:9px;font-weight:800;padding:1px 6px;}
+.sb-admin{margin-top:auto;background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:11px;display:flex;align-items:center;gap:9px;}
+.sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0;}
+.sb-nm{font-size:12px;font-weight:800;}.sb-mt{font-size:10px;color:var(--muted);}
+.logout-btn{margin-top:7px;width:100%;padding:7px;border:1px solid var(--border);border-radius:8px;background:transparent;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s;}
+.logout-btn:hover{border-color:var(--red);color:var(--red);}
+
+.main{flex:1;overflow-y:auto;background:var(--bg);}
+.main-inner{padding:24px;}
+.tab-page{display:none;}
+.tab-page.active{display:block;animation:slideUp .3s ease both;}
+.page-title{font-size:20px;font-weight:900;}
+.page-sub{color:var(--muted);font-size:12px;margin-top:3px;margin-bottom:18px;}
+
+/* TOP BAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.btn-sm{padding:8px 14px;border-radius:8px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:12px;cursor:pointer;transition:all .15s;}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--purple));color:#fff;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(99,102,241,.4);}
+.btn-outline{background:var(--surface);border:1px solid var(--border);color:var(--text);}
+.btn-green{background:linear-gradient(135deg,var(--green),#059669);color:#fff;}
+.btn-red{background:var(--red);color:#fff;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.c-blue::after{background:linear-gradient(90deg,var(--primary),var(--purple));}
+.stat-card.c-green::after{background:linear-gradient(90deg,var(--green),#34d399);}
+.stat-card.c-amber::after{background:linear-gradient(90deg,var(--amber),#f97316);}
+.stat-card.c-red::after{background:linear-gradient(90deg,var(--red),#f97316);}
+.stat-ic{font-size:22px;margin-bottom:8px;}
+.stat-num{font-size:28px;font-weight:900;}
+.stat-lbl{font-size:11px;color:var(--muted);font-weight:700;margin-top:2px;}
+.stat-trend{font-size:10px;font-weight:800;margin-top:4px;}
+.trend-up{color:var(--green);}.trend-dn{color:var(--red);}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;}
+.card-title{font-size:13px;font-weight:800;}
+.chip{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;}
+.chip-green{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.2);}
+.chip-red{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.2);}
+.chip-blue{background:var(--primary-light);color:var(--primary);border:1px solid rgba(99,102,241,.2);}
+.chip-amber{background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.2);}
+.chip-purple{background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.2);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{text-align:left;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:10px 13px;border-bottom:1px solid var(--border);}
+.tbl td{padding:12px 13px;border-bottom:1px solid rgba(42,42,74,.5);font-size:13px;font-weight:600;vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--surface2);}
+.school-av{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#fff;flex-shrink:0;}
+
+/* PLAN BADGES */
+.plan-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;}
+.plan-enterprise{background:linear-gradient(135deg,rgba(251,191,36,.2),rgba(245,158,11,.1));color:var(--gold);border:1px solid rgba(251,191,36,.3);}
+.plan-pro{background:var(--primary-light);color:var(--primary);border:1px solid rgba(99,102,241,.2);}
+.plan-basic{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+
+/* STATUS DOT */
+.status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px;}
+.dot-active{background:var(--green);box-shadow:0 0 6px var(--green);}
+.dot-trial{background:var(--amber);box-shadow:0 0 6px var(--amber);}
+.dot-inactive{background:var(--red);}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:500px;max-height:85vh;overflow-y:auto;animation:slideUp .3s ease both;box-shadow:0 32px 80px rgba(0,0,0,.6);}
+.modal-title{font-size:17px;font-weight:900;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:center;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.form-group input,.form-group select{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Nunito',sans-serif;font-size:13px;color:var(--text);outline:none;background:var(--surface2);transition:border .2s;}
+.form-group input:focus,.form-group select:focus{border-color:var(--primary);}
+.form-group select option{background:var(--surface);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* REVENUE BARS */
+.rev-bar-wrap{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.rev-lbl{font-size:12px;font-weight:700;width:100px;flex-shrink:0;color:var(--muted);}
+.rev-bar-bg{flex:1;background:var(--surface2);border-radius:99px;height:8px;}
+.rev-bar-fill{height:8px;border-radius:99px;}
+.rev-val{font-size:12px;font-weight:800;width:70px;text-align:right;flex-shrink:0;}
+
+/* ACTIVITY FEED */
+.feed-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(42,42,74,.5);align-items:flex-start;}
+.feed-item:last-child{border-bottom:none;}
+.feed-ic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.feed-title{font-size:12px;font-weight:800;margin-bottom:2px;}
+.feed-time{font-size:10px;color:var(--muted);font-weight:700;}
+
+/* AI SECTION */
+.ai-output{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;min-height:120px;font-size:13px;line-height:1.7;color:var(--muted);}
+
+/* SEARCH */
+.search-bar{display:flex;gap:10px;margin-bottom:14px;}
+.search-inp{flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-family:'Nunito',sans-serif;font-size:13px;color:var(--text);outline:none;}
+.search-inp:focus{border-color:var(--primary);}
+.filter-sel{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-family:'Nunito',sans-serif;font-size:13px;color:var(--text);outline:none;}
+
+/* SCHOOL DETAIL SIDE PANEL */
+.side-panel{position:fixed;right:0;top:0;bottom:0;width:480px;background:var(--surface);border-left:1px solid var(--border);z-index:150;transform:translateX(100%);transition:transform .3s ease;overflow-y:auto;padding:24px;}
+.side-panel.open{transform:translateX(0);}
+
+/* NOTIFICATION TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 18px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:10px;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.5);transform:translateY(80px);opacity:0;transition:all .3s ease;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-left:3px solid var(--green);}
+.toast.error{border-left:3px solid var(--red);}
+
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+
+
+/* ══════════ MOBILE RESPONSIVE ══════════ */
+@media (max-width: 768px) {
+
+  /* Hide sidebar by default */
+  .sidebar {
+    position: fixed !important;
+    left: -270px !important;
+    top: 0; bottom: 0;
+    z-index: 9999 !important;
+    width: 260px !important;
+    transition: left 0.3s ease !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.4) !important;
+  }
+  .sidebar.mob-open {
+    left: 0 !important;
+  }
+
+  /* Overlay */
+  #mob-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 9998;
+  }
+  #mob-overlay.show { display: block; }
+
+  /* Hamburger */
+  #mob-ham {
+    display: flex !important;
+    position: fixed;
+    top: 10px; left: 10px;
+    z-index: 99999;
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: var(--primary, #4f46e5);
+    border: none; cursor: pointer;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 5px;
+    box-shadow: 0 4px 16px rgba(79,70,229,0.5);
+  }
+  #mob-ham span {
+    display: block;
+    width: 20px; height: 2.5px;
+    background: #fff;
+    border-radius: 99px;
+  }
+
+  /* Main fills screen */
+  #screen-dash, #screen-dashboard {
+    flex-direction: column !important;
+  }
+  .main {
+    width: 100vw !important;
+    min-width: 0 !important;
+  }
+  .main-inner {
+    padding: 12px !important;
+    padding-top: 62px !important;
+  }
+
+  /* Grids */
+  .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .two-col { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .three-col { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .ex-grid { grid-template-columns: 1fr 1fr !important; }
+  .badges-grid { grid-template-columns: repeat(3,1fr) !important; }
+  .choice-grid { grid-template-columns: 1fr 1fr !important; }
+
+  /* Text */
+  .page-title { font-size: 18px !important; }
+  .stat-num { font-size: 22px !important; }
+  .stat-card { padding: 12px !important; }
+  .card { padding: 13px !important; }
+
+  /* Chat */
+  .doubt-layout { flex-direction: column !important; height: auto !important; }
+  .doubt-sidebar { width: 100% !important; order: 2; }
+  .chat-wrap { height: 55vh !important; order: 1; }
+
+  /* Login */
+  .login-card, .auth-card, .assess-wrap {
+    width: 95vw !important;
+    padding: 22px 16px !important;
+    margin: 10px auto !important;
+    max-width: 100% !important;
+  }
+  .assess-wrap { width: 95vw !important; }
+
+  /* Table scroll */
+  .card { overflow-x: auto; }
+
+  /* Search bar */
+  .search-bar { flex-direction: column !important; }
+  .search-inp, .filter-sel { width: 100% !important; }
+
+  /* Admin table smaller */
+  .tbl th, .tbl td { padding: 8px 8px !important; font-size: 11px !important; }
+
+  /* Modal */
+  .modal, .modal-box { width: 95vw !important; max-height: 90vh !important; }
+
+  /* Call overlay */
+  .call-transcript { width: 92% !important; }
+  .call-avatar { width: 90px !important; height: 90px !important; font-size: 36px !important; }
+
+  /* Junior banner */
+  .junior-banner { flex-direction: column !important; text-align: center !important; }
+
+  /* Focus bar */
+  #focusbar { flex-wrap: wrap !important; gap: 8px !important; }
+
+  /* Hide desktop detail panel */
+  .side-panel { width: 100% !important; }
+}
+
+@media (max-width: 420px) {
+  .three-col { grid-template-columns: 1fr !important; }
+  .badges-grid { grid-template-columns: 1fr 1fr !important; }
+  .stat-num { font-size: 20px !important; }
+  .hero-stats { gap: 10px !important; }
+}
+
+/* ════════════════════════════════
+   PROFESSIONAL MOBILE RESPONSIVE
+   ════════════════════════════════ */
+
+/* Hamburger button */
+.ham-btn {
+  display: none;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 1000;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--primary);
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  box-shadow: 0 4px 16px rgba(99,102,241,.5);
+}
+.ham-btn span {
+  width: 18px;
+  height: 2px;
+  background: #fff;
+  border-radius: 99px;
+  display: block;
+  transition: all .25s;
+}
+.sb-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 998;
+  backdrop-filter: blur(2px);
+}
+
+@media (max-width: 768px) {
+  /* Show hamburger */
+  .ham-btn { display: flex !important; }
+
+  /* Sidebar slide in */
+  .sidebar {
+    position: fixed !important;
+    left: -280px !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    z-index: 999 !important;
+    transition: left .3s cubic-bezier(.4,0,.2,1) !important;
+    width: 270px !important;
+    overflow-y: auto !important;
+    box-shadow: 4px 0 30px rgba(0,0,0,.3) !important;
+  }
+  .sidebar.sb-open { left: 0 !important; }
+  .sb-overlay.sb-show { display: block !important; }
+
+  /* Main content */
+  #screen-dash, #screen-dashboard {
+    flex-direction: column !important;
+  }
+  .main {
+    width: 100% !important;
+    min-height: 100vh !important;
+  }
+  .main-inner {
+    padding: 14px !important;
+    padding-top: 64px !important;
+  }
+
+  /* Grids */
+  .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .two-col { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .three-col { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .ex-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .badges-grid { grid-template-columns: repeat(3,1fr) !important; gap: 10px !important; }
+  .choice-grid { grid-template-columns: 1fr 1fr !important; }
+
+  /* Typography */
+  .page-title { font-size: 19px !important; margin-bottom: 2px !important; }
+  .stat-num { font-size: 22px !important; }
+  .stat-card { padding: 12px !important; }
+  .card { padding: 14px !important; }
+  .card-title { font-size: 13px !important; }
+
+  /* Chat - FIXED */
+  .doubt-layout { flex-direction: column !important; height: auto !important; gap: 12px !important; }
+  .doubt-sidebar { width: 100% !important; order: 2 !important; }
+  .chat-wrap { 
+    height: 70vh !important; 
+    min-height: 400px !important;
+    order: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .chat-msgs { 
+    flex: 1 !important;
+    display: flex !important; 
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    padding: 12px !important;
+    gap: 10px !important;
+  }
+  .msg { display: flex !important; gap: 7px !important; }
+  .msg.user { flex-direction: row-reverse !important; }
+  .msg.ai { flex-direction: row !important; }
+  .msg-av { 
+    width: 28px !important; height: 28px !important; 
+    font-size: 11px !important; flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .bubble { 
+    max-width: 82% !important; 
+    font-size: 13px !important; 
+    line-height: 1.6 !important;
+    padding: 10px 13px !important;
+    display: block !important;
+  }
+  .typing-wrap { display: flex !important; }
+  .chat-foot { padding: 10px !important; }
+  .inp-row { gap: 7px !important; }
+  .chat-inp { font-size: 14px !important; padding: 10px 12px !important; }
+  .send-btn, .voice-btn { width: 40px !important; height: 40px !important; font-size: 16px !important; }
+
+  /* Login cards */
+  .login-card, .auth-card {
+    width: 95vw !important;
+    max-width: 420px !important;
+    padding: 24px 20px !important;
+    margin: 0 auto !important;
+    border-radius: 20px !important;
+  }
+  #screen-login, #screen-auth {
+    padding: 20px 0 !important;
+    align-items: center !important;
+  }
+
+  /* Assessment */
+  .assess-wrap { width: 100% !important; padding: 16px !important; }
+  .assess-card { padding: 20px !important; border-radius: 18px !important; }
+  .choice-grid { gap: 8px !important; }
+  .choice { padding: 10px !important; font-size: 12px !important; }
+  .choice .em { font-size: 18px !important; }
+
+  /* Tables */
+  .card table, .tbl { display: block !important; overflow-x: auto !important; }
+  .tbl th, .tbl td { padding: 8px 10px !important; font-size: 11px !important; white-space: nowrap !important; }
+
+  /* Search bar */
+  .search-bar { flex-direction: column !important; gap: 8px !important; }
+  .search-inp, .filter-sel { width: 100% !important; }
+
+  /* Modals */
+  .modal-overlay .modal { width: 95vw !important; padding: 20px !important; }
+  .modal-overlay .detail-panel { width: 100vw !important; padding: 20px !important; }
+
+  /* Call overlay */
+  .call-overlay { padding: 24px 16px !important; }
+  .call-avatar { width: 88px !important; height: 88px !important; font-size: 36px !important; margin-bottom: 14px !important; }
+  .call-transcript { width: 95% !important; font-size: 13px !important; min-height: 50px !important; }
+  .call-btns { gap: 16px !important; }
+  .call-btn { width: 58px !important; height: 58px !important; font-size: 22px !important; }
+
+  /* Progress/Report */
+  .report-banner { padding: 16px !important; gap: 12px !important; }
+
+  /* Leaderboard */
+  .lb-item, .lb-row { padding: 10px 12px !important; }
+
+  /* Nav items */
+  .nav-item { padding: 12px 10px !important; font-size: 14px !important; }
+  .nav-ic { font-size: 18px !important; }
+
+  /* Quick topics hide on mobile */
+  .doubt-sidebar .card:last-child { display: none !important; }
+  
+  /* Lang buttons */
+  .lang-btns { flex-wrap: wrap !important; gap: 6px !important; }
+  .lang-btn { font-size: 12px !important; padding: 6px 12px !important; }
+
+  /* Format buttons */  
+  .fmt-btns { gap: 4px !important; }
+  .fmt-btn { padding: 4px 8px !important; font-size: 10px !important; }
+}
+
+@media (max-width: 380px) {
+  .stats-grid { grid-template-columns: 1fr 1fr !important; }
+  .three-col { grid-template-columns: 1fr !important; }
+  .badges-grid { grid-template-columns: repeat(2,1fr) !important; }
+  .page-title { font-size: 17px !important; }
+  .stat-num { font-size: 20px !important; }
+  .main-inner { padding-top: 58px !important; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="login-badge">🛡️ Super Admin Portal</div>
+    <div class="login-title">StudyBot AI Admin</div>
+    <div class="login-sub">Complete control over all schools, users, and platform performance.</div>
+    <div class="access-levels">
+      <div class="al-item"><span>🏫</span>Schools</div>
+      <div class="al-item"><span>👥</span>All Users</div>
+      <div class="al-item"><span>📊</span>Analytics</div>
+    </div>
+    <div class="inp"><label>Admin Email</label><input id="a-email" type="email" value="admin@studybot.ai" placeholder="admin@studybot.ai"/></div>
+    <div class="inp"><label>Password</label><input id="a-pass" type="password" value="password" placeholder="••••••••"/></div>
+    <button class="btn-login" id="login-btn" onclick="doLogin()">Access Admin Panel →</button>
+    <div id="login-msg" class="login-msg"></div>
+    <p class="demo-note">Demo: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a3c2c7cecacde3d0d7d6c7dac1ccd78dc2ca">[email&#160;protected]</a> / password</p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="screen-dash" class="screen">
+  <aside class="sidebar">
+    <div class="sb-logo"><div class="sq">🤖</div><div class="sb-logo-txt">Study<span>Bot</span></div></div>
+    <div class="sb-badge">🛡️ Super Admin</div>
+    <div class="nav-sec">Platform</div>
+    <div class="nav-item active" onclick="tab('overview',this)"><span class="nav-ic">🏠</span>Overview</div>
+    <div class="nav-item" onclick="tab('schools',this)"><span class="nav-ic">🏫</span>All Schools</div>
+    <div class="nav-item" onclick="tab('users',this)"><span class="nav-ic">👥</span>All Users</div>
+    <div class="nav-item" onclick="tab('revenue',this)"><span class="nav-ic">💰</span>Revenue</div>
+    <div class="nav-sec">Tools</div>
+    <div class="nav-item" onclick="tab('activity',this)"><span class="nav-ic">⚡</span>Activity Feed</div>
+    <div class="nav-item" onclick="tab('ai',this)"><span class="nav-ic">🤖</span>AI Analysis</div>
+    <div class="nav-item" onclick="tab('settings',this)"><span class="nav-ic">⚙️</span>Settings</div>
+    <div class="sb-admin">
+      <div class="sb-av" id="sb-av">A</div>
+      <div><div class="sb-nm" id="sb-nm">Admin</div><div class="sb-mt" style="color:var(--primary);font-size:10px;font-weight:800">Super Admin</div></div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+  </aside>
+
+  <main class="main"><div class="main-inner">
+
+    <!-- OVERVIEW -->
+    <div class="tab-page active" id="tab-overview">
+      <div class="topbar">
+        <div><div class="page-title">Platform Overview 🚀</div><div class="page-sub">StudyBot AI — Real-time dashboard</div></div>
+        <div class="topbar-right">
+          <button class="btn-sm btn-outline" onclick="tab('schools',document.querySelector('[onclick*=schools]'))">🏫 Manage Schools</button>
+          <button class="btn-sm btn-primary" onclick="openAddSchool()">+ Add School</button>
+        </div>
+      </div>
+
+      <!-- AI Banner -->
+      <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid rgba(99,102,241,.3);border-radius:var(--radius);padding:16px 20px;margin-bottom:18px;display:flex;gap:14px;align-items:center;">
+        <div style="width:44px;height:44px;border-radius:50%;background:rgba(99,102,241,.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🤖</div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:800;margin-bottom:3px;color:#a5b4fc">AI Platform Insight</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5" id="ai-platform-tip">Generating insight...</div>
+        </div>
+        <button class="btn-sm btn-outline" style="flex-shrink:0" onclick="loadPlatformTip()">↻ Refresh</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card c-blue"><div class="stat-ic">🏫</div><div class="stat-num" id="stat-schools">0</div><div class="stat-lbl">Total Schools</div><div class="stat-trend trend-up">↑ Active on platform</div></div>
+        <div class="stat-card c-green"><div class="stat-ic">👥</div><div class="stat-num" id="stat-users">0</div><div class="stat-lbl">Total Students</div><div class="stat-trend trend-up">↑ Across all schools</div></div>
+        <div class="stat-card c-amber"><div class="stat-ic">💰</div><div class="stat-num" id="stat-rev">₹0</div><div class="stat-lbl">Monthly Revenue</div><div class="stat-trend trend-up" id="rev-trend">↑ Growing</div></div>
+        <div class="stat-card c-red"><div class="stat-ic">⚠️</div><div class="stat-num" id="stat-expiring">0</div><div class="stat-lbl">Expiring Soon</div><div class="stat-trend trend-dn">⚠ Needs renewal</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">🏫 School Status</div></div>
+          <div id="school-status-list">Loading...</div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">📊 Plan Distribution</div></div>
+          <div id="plan-dist">Loading...</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">⚡ Recent Activity</div><button class="btn-sm btn-outline" onclick="tab('activity',document.querySelector('[onclick*=activity]'))">View All →</button></div>
+        <div id="recent-activity">Loading...</div>
+      </div>
+    </div>
+
+    <!-- SCHOOLS -->
+    <div class="tab-page" id="tab-schools">
+      <div class="topbar">
+        <div><div class="page-title">All Schools 🏫</div><div class="page-sub">Manage schools, plans and subscriptions</div></div>
+        <div class="topbar-right">
+          <button class="btn-sm btn-primary" onclick="openAddSchool()">+ Add School</button>
+        </div>
+      </div>
+      <div class="search-bar">
+        <input class="search-inp" type="text" placeholder="🔍 Search school by name or city..." oninput="filterSchools()"/>
+        <select class="filter-sel" id="school-filter" onchange="filterSchools()">
+          <option value="">All Plans</option>
+          <option value="enterprise">Enterprise</option>
+          <option value="pro">Pro</option>
+          <option value="basic">Basic</option>
+        </select>
+        <select class="filter-sel" id="status-filter" onchange="filterSchools()">
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="trial">Trial</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="tbl" id="schools-table">
+          <thead><tr>
+            <th>School</th><th>City</th><th>Students</th><th>Teachers</th><th>Plan</th><th>Status</th><th>Expires</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="schools-tbody"><tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted);font-weight:700">Loading schools...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="tab-page" id="tab-users">
+      <div class="topbar">
+        <div><div class="page-title">All Users 👥</div><div class="page-sub">Students, teachers, and parents across all schools</div></div>
+        <div class="topbar-right">
+          <button class="btn-sm btn-primary" onclick="openAddTeacher()">+ Add Teacher</button>
+        </div>
+      </div>
+      <div class="search-bar">
+        <input class="search-inp" type="text" id="user-search" placeholder="🔍 Search users..." oninput="filterUsers()"/>
+        <select class="filter-sel" id="role-filter" onchange="filterUsers()">
+          <option value="">All Roles</option>
+          <option value="student">Students</option>
+          <option value="teacher">Teachers</option>
+          <option value="parent">Parents</option>
+        </select>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="tbl">
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>School</th><th>Points</th><th>Streak</th><th>Joined</th></tr></thead>
+          <tbody id="users-tbody"><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted);font-weight:700">Loading users...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REVENUE -->
+    <div class="tab-page" id="tab-revenue">
+      <div class="page-title">Revenue 💰</div>
+      <p class="page-sub">Subscription revenue across all plans</p>
+      <div class="three-col">
+        <div class="card" style="border-top:2px solid var(--green)">
+          <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Monthly Recurring</div>
+          <div style="font-size:32px;font-weight:900;color:var(--green)" id="rev-mrr">₹0</div>
+          <div style="font-size:11px;color:var(--green);font-weight:700;margin-top:4px">↑ 23% from last month</div>
+        </div>
+        <div class="card" style="border-top:2px solid var(--primary)">
+          <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Annual Revenue</div>
+          <div style="font-size:32px;font-weight:900;color:var(--primary)" id="rev-arr">₹0</div>
+          <div style="font-size:11px;color:var(--muted);font-weight:700;margin-top:4px">Projected annual</div>
+        </div>
+        <div class="card" style="border-top:2px solid var(--amber)">
+          <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Avg Revenue/School</div>
+          <div style="font-size:32px;font-weight:900;color:var(--amber)" id="rev-avg">₹0</div>
+          <div style="font-size:11px;color:var(--muted);font-weight:700;margin-top:4px">Per school/month</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">💰 Revenue by School</div></div>
+        <div id="rev-bars">Loading...</div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="card-hdr"><div class="card-title">📅 Plan Pricing</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
+            <div style="font-size:11px;font-weight:800;color:var(--muted);margin-bottom:6px">BASIC</div>
+            <div style="font-size:26px;font-weight:900">₹4,999</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">per month</div>
+            <div style="font-size:11px;color:var(--green);margin-top:6px;font-weight:700">Up to 100 students</div>
+          </div>
+          <div style="background:var(--primary-light);border:1px solid rgba(99,102,241,.3);border-radius:12px;padding:16px;text-align:center">
+            <div style="font-size:11px;font-weight:800;color:var(--primary);margin-bottom:6px">PRO ⭐</div>
+            <div style="font-size:26px;font-weight:900;color:var(--primary)">₹9,999</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">per month</div>
+            <div style="font-size:11px;color:var(--green);margin-top:6px;font-weight:700">Up to 300 students</div>
+          </div>
+          <div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:12px;padding:16px;text-align:center">
+            <div style="font-size:11px;font-weight:800;color:var(--gold);margin-bottom:6px">ENTERPRISE 👑</div>
+            <div style="font-size:26px;font-weight:900;color:var(--gold)">₹24,999</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">per month</div>
+            <div style="font-size:11px;color:var(--green);margin-top:6px;font-weight:700">Unlimited students</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div class="tab-page" id="tab-activity">
+      <div class="page-title">Activity Feed ⚡</div>
+      <p class="page-sub">Real-time platform events</p>
+      <div class="card" id="activity-feed">Loading...</div>
+    </div>
+
+    <!-- AI ANALYSIS -->
+    <div class="tab-page" id="tab-ai">
+      <div class="page-title">AI Analysis 🤖</div>
+      <p class="page-sub">Claude AI gives deep insights about your platform performance</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+        <button class="btn-sm btn-primary" onclick="aiAnalyse('growth')">📈 Growth Analysis</button>
+        <button class="btn-sm" style="background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.2)" onclick="aiAnalyse('churn')">⚠️ Churn Risk Schools</button>
+        <button class="btn-sm" style="background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.2)" onclick="aiAnalyse('upsell')">💰 Upsell Opportunities</button>
+        <button class="btn-sm" style="background:rgba(6,182,212,.15);color:var(--cyan);border:1px solid rgba(6,182,212,.2)" onclick="aiAnalyse('product')">🛠️ Product Recommendations</button>
+      </div>
+      <div class="card">
+        <div id="ai-analysis-output" class="ai-output">
+          <div style="text-align:center;padding:40px;color:var(--muted)">
+            <div style="font-size:36px;margin-bottom:10px">🤖</div>
+            Click any button above to get AI-powered platform analysis
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="tab-page" id="tab-settings">
+      <div class="page-title">Settings ⚙️</div>
+      <p class="page-sub">Platform configuration and management</p>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px">🔔 Notifications</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div><div style="font-size:13px;font-weight:700">New school signup alerts</div><div style="font-size:11px;color:var(--muted)">Email when new school registers</div></div>
+              <div style="width:40px;height:22px;background:var(--primary);border-radius:99px;cursor:pointer;position:relative"><div style="width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;right:3px;top:3px;transition:.2s"></div></div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div><div style="font-size:13px;font-weight:700">Subscription expiry alerts</div><div style="font-size:11px;color:var(--muted)">7 days before expiry</div></div>
+              <div style="width:40px;height:22px;background:var(--primary);border-radius:99px;cursor:pointer;position:relative"><div style="width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;right:3px;top:3px;transition:.2s"></div></div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div><div style="font-size:13px;font-weight:700">Weekly revenue report</div><div style="font-size:11px;color:var(--muted)">Every Monday at 9am</div></div>
+              <div style="width:40px;height:22px;background:var(--border);border-radius:99px;cursor:pointer;position:relative"><div style="width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;left:3px;top:3px;transition:.2s"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px">🔑 API & Integrations</div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">Anthropic API Key</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-size:11px;font-family:monospace;color:var(--muted);margin-bottom:12px">sk-ant-api03-••••••••••••••••••••••••</div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">Supabase Project</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-size:11px;font-family:monospace;color:var(--muted);margin-bottom:12px">sopodkkcjtgqfnpsdsai · ap-south-1</div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">Backend URL</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-size:11px;font-family:monospace;color:var(--green)">studybot-backend.onrender.com ✅</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:14px">🗂️ Platform Info</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:13px">
+          <div style="background:var(--surface2);border-radius:10px;padding:12px"><div style="font-weight:800">Version</div><div style="color:var(--muted);margin-top:3px">StudyBot AI v1.0.0</div></div>
+          <div style="background:var(--surface2);border-radius:10px;padding:12px"><div style="font-weight:800">Region</div><div style="color:var(--muted);margin-top:3px">ap-south-1 (Mumbai)</div></div>
+          <div style="background:var(--surface2);border-radius:10px;padding:12px"><div style="font-weight:800">Built by</div><div style="color:var(--primary);margin-top:3px;font-weight:800">Aryan Varma 🚀</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div></main>
+</div>
+
+<!-- ADD SCHOOL MODAL -->
+<div class="modal-overlay" id="add-school-modal">
+  <div class="modal">
+    <div class="modal-title">🏫 Add New School <button class="modal-close" onclick="closeModal('add-school-modal')">✕</button></div>
+    <div class="form-row">
+      <div class="form-group"><label>School Name</label><input id="s-name" placeholder="e.g. Vidya Mandir High School"/></div>
+      <div class="form-group"><label>School Code</label><input id="s-code" placeholder="e.g. VMH001"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>City</label><input id="s-city" placeholder="Aurangabad"/></div>
+      <div class="form-group"><label>State</label><input id="s-state" placeholder="Maharashtra"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Contact Email</label><input id="s-email" type="email" placeholder="principal@school.edu.in"/></div>
+      <div class="form-group"><label>Contact Phone</label><input id="s-phone" placeholder="+91 98765 00000"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Plan</label>
+        <select id="s-plan">
+          <option value="basic">Basic — ₹4,999/mo</option>
+          <option value="pro" selected>Pro — ₹9,999/mo</option>
+          <option value="enterprise">Enterprise — ₹24,999/mo</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Subscription End</label><input id="s-end" type="date"/></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:6px">
+      <button class="btn-sm btn-primary" style="flex:1;padding:12px" onclick="submitAddSchool()">✅ Add School</button>
+      <button class="btn-sm btn-outline" onclick="closeModal('add-school-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TEACHER MODAL -->
+<div class="modal-overlay" id="add-teacher-modal">
+  <div class="modal">
+    <div class="modal-title">👨‍🏫 Add Teacher <button class="modal-close" onclick="closeModal('add-teacher-modal')">✕</button></div>
+    <div class="form-group"><label>Full Name</label><input id="t-name" placeholder="Mrs. Sunita Desai"/></div>
+    <div class="form-row">
+      <div class="form-group"><label>Email</label><input id="t-email" type="email" placeholder="teacher@school.edu.in"/></div>
+      <div class="form-group"><label>School</label>
+        <select id="t-school">
+          <option value="00000000-0000-0000-0000-000000000001">Vidya Mandir High School</option>
+          <option value="bbbbbbbb-0000-0000-0000-000000000001">Delhi Public School</option>
+          <option value="bbbbbbbb-0000-0000-0000-000000000002">St. Xavier's</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Class</label><input id="t-class" placeholder="10"/></div>
+      <div class="form-group"><label>Password</label><input id="t-password" type="password" placeholder="Set initial password"/></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:6px">
+      <button class="btn-sm btn-primary" style="flex:1;padding:12px" onclick="submitAddTeacher()">✅ Add Teacher</button>
+      <button class="btn-sm btn-outline" onclick="closeModal('add-teacher-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCHOOL DETAIL PANEL -->
+<div class="side-panel" id="school-detail">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div style="font-size:16px;font-weight:900">School Details</div>
+    <button class="modal-close" onclick="closeSchoolDetail()">✕</button>
+  </div>
+  <div id="school-detail-content">Loading...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✅ Done</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+var BACKEND = 'https://studybot-backend.onrender.com';
+var adminUser = null;
+var authToken = null;
+var allSchools = [];
+var allUsers = [];
+
+var planPrices = {enterprise:24999, pro:9999, basic:4999};
+var schoolColors = ['linear-gradient(135deg,#6366f1,#7c3aed)','linear-gradient(135deg,#10b981,#059669)','linear-gradient(135deg,#f59e0b,#f97316)','linear-gradient(135deg,#06b6d4,#0891b2)','linear-gradient(135deg,#ef4444,#e11d48)'];
+
+/* ── LOGIN ── */
+function doLogin() {
+  var email = document.getElementById('a-email').value.trim();
+  var pass = document.getElementById('a-pass').value;
+  if (!email || !pass) { showMsg('Please fill all fields'); return; }
+  var btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Accessing...';
+  fetch(BACKEND + '/api/auth/login', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email:email, password:pass})
+  }).then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
+  .then(function(r){
+    if (!r.ok) throw new Error(r.d.error || 'Login failed');
+    if (r.d.user.role !== 'admin') throw new Error('Access denied. Admin account required.');
+    authToken = r.d.token; adminUser = r.d.user;
+    localStorage.setItem('sb_admin_token', authToken);
+    loadDashboard();
+  }).catch(function(e){ showMsg('❌ ' + e.message); })
+  .finally(function(){ btn.disabled=false; btn.textContent='Access Admin Panel →'; });
+}
+
+function doLogout() {
+  localStorage.removeItem('sb_admin_token');
+  adminUser=null; authToken=null; allSchools=[]; allUsers=[];
+  document.getElementById('screen-dash').classList.remove('active');
+  document.getElementById('screen-login').classList.add('active');
+}
+
+window.onload = function() {
+  var token = localStorage.getItem('sb_admin_token');
+  if (!token) return;
+  fetch(BACKEND+'/api/auth/profile',{headers:{'Authorization':'Bearer '+token}})
+  .then(function(r){if(r.ok)return r.json();throw new Error();})
+  .then(function(u){if(u.role!=='admin')throw new Error();authToken=token;adminUser=u;loadDashboard();})
+  .catch(function(){localStorage.removeItem('sb_admin_token');});
+};
+
+/* ── LOAD DASHBOARD ── */
+function loadDashboard() {
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-dash').classList.add('active');
+  document.getElementById('sb-av').textContent = adminUser.name[0].toUpperCase();
+  document.getElementById('sb-nm').textContent = adminUser.name;
+  // Use demo data + real DB
+  allSchools = [
+    {id:'00000000-0000-0000-0000-000000000001',name:'Vidya Mandir High School',city:'Aurangabad',state:'Maharashtra',contact_email:'principal@vidyamandir.edu.in',contact_phone:'+91 99001 23456',student_count:5,teacher_count:1,plan:'pro',status:'active',subscription_end:'2026-12-31',school_code:'DEMO2025'},
+    {id:'bbbbbbbb-0000-0000-0000-000000000001',name:'Delhi Public School',city:'Mumbai',state:'Maharashtra',contact_email:'admin@dps.edu.in',contact_phone:'+91 98765 11111',student_count:312,teacher_count:18,plan:'enterprise',status:'active',subscription_end:'2026-12-31',school_code:'DPS001'},
+    {id:'bbbbbbbb-0000-0000-0000-000000000002',name:"St. Xavier's High School",city:'Pune',state:'Maharashtra',contact_email:'contact@stxaviers.edu.in',contact_phone:'+91 98765 22222',student_count:187,teacher_count:12,plan:'pro',status:'active',subscription_end:'2026-06-30',school_code:'SXP002'},
+    {id:'bbbbbbbb-0000-0000-0000-000000000003',name:'Kendriya Vidyalaya',city:'Nagpur',state:'Maharashtra',contact_email:'kv.nagpur@gov.in',contact_phone:'+91 98765 33333',student_count:89,teacher_count:6,plan:'basic',status:'trial',subscription_end:'2026-03-31',school_code:'KVN003'},
+    {id:'bbbbbbbb-0000-0000-0000-000000000004',name:'Ryan International',city:'Nashik',state:'Maharashtra',contact_email:'info@ryan.edu.in',contact_phone:'+91 98765 44444',student_count:0,teacher_count:0,plan:'basic',status:'inactive',subscription_end:'2025-12-31',school_code:'RIN004'}
+  ];
+  allUsers = [
+    {name:'Rohan Sharma',email:'demo@studybot.ai',role:'student',school:'Vidya Mandir',points:2840,streak:12,created_at:'2025-01-15'},
+    {name:'Priya Mehta',email:'priya@student.com',role:'student',school:'Vidya Mandir',points:3240,streak:15,created_at:'2025-01-16'},
+    {name:'Arjun Patel',email:'arjun@student.com',role:'student',school:'Vidya Mandir',points:3010,streak:10,created_at:'2025-01-17'},
+    {name:'Sneha Joshi',email:'sneha@student.com',role:'student',school:'Vidya Mandir',points:2620,streak:5,created_at:'2025-01-18'},
+    {name:'Rahul Verma',email:'rahul@student.com',role:'student',school:'Vidya Mandir',points:1890,streak:3,created_at:'2025-01-19'},
+    {name:'Mrs. Priya Sharma',email:'teacher@studybot.ai',role:'teacher',school:'Vidya Mandir',points:0,streak:0,created_at:'2025-01-10'},
+    {name:'Rakesh Sharma',email:'parent@studybot.ai',role:'parent',school:'Vidya Mandir',points:0,streak:0,created_at:'2025-01-20'},
+    {name:'Aryan Varma',email:'admin@studybot.ai',role:'admin',school:'Platform',points:0,streak:0,created_at:'2025-01-01'}
+  ];
+  renderOverview();
+  renderSchools(allSchools);
+  renderUsers(allUsers);
+  renderRevenue();
+  renderActivity();
+  loadPlatformTip();
+}
+
+function renderOverview() {
+  var totalStudents = allSchools.reduce(function(a,s){return a+s.student_count;},0);
+  var mrr = allSchools.reduce(function(a,s){return a+(s.status!=='inactive'?planPrices[s.plan]||0:0);},0);
+  var expiring = allSchools.filter(function(s){var d=new Date(s.subscription_end);var now=new Date();return (d-now)<30*24*60*60*1000&&d>now;}).length;
+
+  document.getElementById('stat-schools').textContent = allSchools.length;
+  document.getElementById('stat-users').textContent = totalStudents;
+  document.getElementById('stat-rev').textContent = '₹' + mrr.toLocaleString('en-IN');
+  document.getElementById('stat-expiring').textContent = expiring;
+  document.getElementById('rev-mrr').textContent = '₹' + mrr.toLocaleString('en-IN');
+  document.getElementById('rev-arr').textContent = '₹' + (mrr*12).toLocaleString('en-IN');
+  document.getElementById('rev-avg').textContent = '₹' + Math.round(mrr/Math.max(allSchools.filter(function(s){return s.status!=='inactive';}).length,1)).toLocaleString('en-IN');
+
+  // School status list
+  var html = '';
+  allSchools.forEach(function(s, i){
+    var dotClass = s.status==='active'?'dot-active':s.status==='trial'?'dot-trial':'dot-inactive';
+    html += '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(42,42,74,.5)"><div class="school-av" style="background:'+schoolColors[i%schoolColors.length]+'">'+s.name[0]+'</div><div style="flex:1"><div style="font-size:13px;font-weight:800">'+s.name+'</div><div style="font-size:11px;color:var(--muted)">'+s.city+' · '+s.student_count+' students</div></div><span class="dot '+dotClass+'"></span><span style="font-size:11px;font-weight:700;color:var(--muted)">'+s.status+'</span></div>';
+  });
+  document.getElementById('school-status-list').innerHTML = html;
+
+  // Plan distribution
+  var planCounts = {enterprise:0,pro:0,basic:0};
+  allSchools.forEach(function(s){if(planCounts[s.plan]!==undefined)planCounts[s.plan]++;});
+  var total = allSchools.length;
+  var planHtml = Object.entries(planCounts).map(function(e){
+    var pct = Math.round(e[1]/total*100);
+    var col = e[0]==='enterprise'?'var(--gold)':e[0]==='pro'?'var(--primary)':'var(--muted)';
+    return '<div class="rev-bar-wrap"><div class="rev-lbl" style="color:'+col+';text-transform:capitalize">'+e[0]+'</div><div class="rev-bar-bg"><div class="rev-bar-fill" style="width:'+pct+'%;background:'+col+'"></div></div><div class="rev-val" style="color:'+col+'">'+e[1]+' school'+(e[1]!==1?'s':'')+'</div></div>';
+  }).join('');
+  document.getElementById('plan-dist').innerHTML = planHtml;
+}
+
+function renderSchools(schools) {
+  if (!schools.length){document.getElementById('schools-tbody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted);font-weight:700">No schools found</td></tr>';return;}
+  var html='';
+  schools.forEach(function(s,i){
+    var planBadge = '<span class="plan-badge plan-'+s.plan+'">'+(s.plan==='enterprise'?'👑':s.plan==='pro'?'⭐':'')+' '+s.plan+'</span>';
+    var dotClass = s.status==='active'?'dot-active':s.status==='trial'?'dot-trial':'dot-inactive';
+    var expDate = s.subscription_end ? new Date(s.subscription_end).toLocaleDateString('en-IN') : 'N/A';
+    var isExpiring = s.subscription_end && (new Date(s.subscription_end)-new Date())<30*24*60*60*1000;
+    html+='<tr><td><div style="display:flex;align-items:center;gap:9px"><div class="school-av" style="background:'+schoolColors[i%schoolColors.length]+'">'+s.name[0]+'</div><div><div style="font-weight:800;font-size:13px">'+s.name+'</div><div style="font-size:10px;color:var(--muted)">'+s.school_code+'</div></div></div></td>';
+    html+='<td style="font-size:12px;color:var(--muted)">'+s.city+'</td>';
+    html+='<td><b>'+s.student_count+'</b></td>';
+    html+='<td><b>'+s.teacher_count+'</b></td>';
+    html+='<td>'+planBadge+'</td>';
+    html+='<td><span style="font-size:12px;font-weight:700"><span class="status-dot '+dotClass+'"></span>'+s.status+'</span></td>';
+    html+='<td style="font-size:11px;color:'+(isExpiring?'var(--red)':'var(--muted)')+'">'+expDate+(isExpiring?' ⚠️':'')+'</td>';
+    html+='<td style="display:flex;gap:5px"><button class="btn-sm btn-outline" style="font-size:11px" onclick="viewSchool(\''+s.id+'\')">👁 View</button><button class="btn-sm" style="background:rgba(16,185,129,.15);color:var(--green);font-size:11px" onclick="renewSchool(\''+s.name+'\')">↻ Renew</button></td></tr>';
+  });
+  document.getElementById('schools-tbody').innerHTML = html;
+}
+
+function filterSchools() {
+  var search = document.querySelector('.search-inp').value.toLowerCase();
+  var plan = document.getElementById('school-filter').value;
+  var status = document.getElementById('status-filter').value;
+  var filtered = allSchools.filter(function(s){
+    return (!search||(s.name.toLowerCase().includes(search)||s.city.toLowerCase().includes(search)))&&(!plan||s.plan===plan)&&(!status||s.status===status);
+  });
+  renderSchools(filtered);
+}
+
+function renderUsers(users){
+  var roleColors = {student:'chip-blue',teacher:'chip-green',parent:'chip-amber',admin:'chip-purple'};
+  var html = users.map(function(u,i){
+    return '<tr><td><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:'+schoolColors[i%schoolColors.length]+';display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff">'+u.name[0]+'</div><b>'+u.name+'</b></div></td><td style="font-size:11px;color:var(--muted)">'+u.email+'</td><td><span class="chip '+roleColors[u.role]+'">'+u.role+'</span></td><td style="font-size:12px;color:var(--muted)">'+u.school+'</td><td><b>'+(u.points||'-')+'</b></td><td>'+(u.streak?'🔥'+u.streak+'d':'-')+'</td><td style="font-size:11px;color:var(--muted)">'+u.created_at+'</td></tr>';
+  }).join('');
+  document.getElementById('users-tbody').innerHTML = html;
+}
+
+function filterUsers(){
+  var search = document.getElementById('user-search').value.toLowerCase();
+  var role = document.getElementById('role-filter').value;
+  var filtered = allUsers.filter(function(u){return(!search||(u.name.toLowerCase().includes(search)||u.email.toLowerCase().includes(search)))&&(!role||u.role===role);});
+  renderUsers(filtered);
+}
+
+function renderRevenue(){
+  var maxRev = Math.max.apply(null, allSchools.map(function(s){return s.status!=='inactive'?planPrices[s.plan]||0:0;}));
+  var html = allSchools.map(function(s,i){
+    var rev = s.status!=='inactive' ? planPrices[s.plan]||0 : 0;
+    var pct = maxRev ? Math.round(rev/maxRev*100) : 0;
+    var col = s.plan==='enterprise'?'var(--gold)':s.plan==='pro'?'var(--primary)':'var(--muted)';
+    return '<div class="rev-bar-wrap"><div class="rev-lbl" style="color:var(--text);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.name.split(' ').slice(0,2).join(' ')+'</div><div class="rev-bar-bg"><div class="rev-bar-fill" style="width:'+pct+'%;background:'+col+'"></div></div><div class="rev-val" style="color:'+col+'">₹'+rev.toLocaleString('en-IN')+'</div></div>';
+  }).join('');
+  document.getElementById('rev-bars').innerHTML = html;
+}
+
+function renderActivity(){
+  var acts = [
+    {ic:'🏫',bg:'rgba(99,102,241,.15)',title:'Kendriya Vidyalaya joined',sub:'Trial plan · Nagpur',time:'10 min ago'},
+    {ic:'💰',bg:'rgba(16,185,129,.15)',title:'St. Xavier\'s renewed Pro plan',sub:'₹9,999/mo · 12 months',time:'2 hours ago'},
+    {ic:'👨‍🎓',bg:'rgba(6,182,212,.15)',title:'47 new students registered',sub:'Delhi Public School',time:'Today'},
+    {ic:'⚠️',bg:'rgba(239,68,68,.15)',title:'Ryan International — Subscription expired',sub:'Inactive · Nashik',time:'3 days ago'},
+    {ic:'🤖',bg:'rgba(245,158,11,.15)',title:'2,843 AI doubts solved today',sub:'Across all schools',time:'Today'},
+    {ic:'📊',bg:'rgba(124,58,237,.15)',title:'Weekly report generated',sub:'Platform metrics summary',time:'Monday'},
+    {ic:'🏆',bg:'rgba(16,185,129,.15)',title:'1,200+ students completed tests',sub:'Across all schools this week',time:'This week'}
+  ];
+  var html = acts.map(function(a){
+    return '<div class="feed-item"><div class="feed-ic" style="background:'+a.bg+'">'+a.ic+'</div><div style="flex:1"><div class="feed-title">'+a.title+'</div><div style="font-size:11px;color:var(--muted);font-weight:700">'+a.sub+'</div></div><div class="feed-time">'+a.time+'</div></div>';
+  }).join('');
+  document.getElementById('recent-activity').innerHTML = html;
+  document.getElementById('activity-feed').innerHTML = '<div style="font-size:13px;font-weight:800;margin-bottom:12px;color:var(--muted)">LATEST EVENTS</div>' + html;
+}
+
+function loadPlatformTip(){
+  document.getElementById('ai-platform-tip').textContent = 'AI is analysing...';
+  var totalStudents = allSchools.reduce(function(a,s){return a+s.student_count;},0);
+  var mrr = allSchools.reduce(function(a,s){return a+(s.status!=='inactive'?planPrices[s.plan]||0:0);},0);
+  var inactive = allSchools.filter(function(s){return s.status==='inactive';}).length;
+  callClaude('EdTech SaaS platform: '+allSchools.length+' schools, '+totalStudents+' students, MRR ₹'+mrr+'. '+inactive+' inactive schools. Give 1 actionable business insight in 2 sentences max.', function(r){
+    document.getElementById('ai-platform-tip').textContent=r;
+  });
+}
+
+function aiAnalyse(type){
+  var out = document.getElementById('ai-analysis-output');
+  out.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:28px;margin-bottom:10px">🤖</div>Claude is analysing your platform...</div>';
+  var totalStudents=allSchools.reduce(function(a,s){return a+s.student_count;},0);
+  var mrr=allSchools.reduce(function(a,s){return a+(s.status!=='inactive'?planPrices[s.plan]||0:0);},0);
+  var schSummary=allSchools.map(function(s){return s.name+' ('+s.plan+', '+s.status+', '+s.student_count+' students)';}).join('; ');
+  var prompts={
+    growth:'EdTech SaaS with '+allSchools.length+' schools, '+totalStudents+' students, MRR ₹'+mrr+'. Schools: '+schSummary+'. Provide a 4-5 point growth analysis: what is working, what is the growth trajectory, what should the business focus on next quarter, and 2 specific acquisition strategies for Indian school market.',
+    churn:'Analyse churn risk for these schools: '+schSummary+'. Identify which schools are at risk of churning, why, and what retention actions to take for each. Be specific.',
+    upsell:'Identify upsell opportunities: '+schSummary+'. Which schools should be upgraded to higher plans? Why? What is the potential MRR increase? Give a prioritised outreach plan.',
+    product:'Based on Indian school market context and this platform data ('+allSchools.length+' schools, '+totalStudents+' students), give 5 specific product features to build next to increase engagement and reduce churn.'
+  };
+  callClaude(prompts[type], function(r){
+    out.innerHTML=r.split('\n').filter(function(l){return l.trim();}).map(function(l){return '<p style="margin-bottom:10px;font-size:13px;line-height:1.7">'+esc(l).replace(/\*\*(.*?)\*\*/g,'<b style="color:var(--text)">$1</b>')+'</p>';}).join('');
+  });
+}
+
+/* ── SCHOOL DETAIL ── */
+function viewSchool(id){
+  var s = allSchools.find(function(x){return x.id===id;});
+  if(!s)return;
+  var panel = document.getElementById('school-detail');
+  panel.classList.add('open');
+  var planBadge='<span class="plan-badge plan-'+s.plan+'">'+(s.plan==='enterprise'?'👑 ':s.plan==='pro'?'⭐ ':'')+(s.plan[0].toUpperCase()+s.plan.slice(1))+'</span>';
+  var rev = planPrices[s.plan]||0;
+  document.getElementById('school-detail-content').innerHTML=
+    '<div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:14px;padding:18px;margin-bottom:16px"><div style="font-size:22px;font-weight:900;margin-bottom:5px">'+s.name+'</div><div style="font-size:12px;color:#a5b4fc">'+s.city+', '+s.state+'</div></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">'+
+    '<div class="card" style="text-align:center;padding:12px"><div style="font-size:22px;font-weight:900;color:var(--primary)">'+s.student_count+'</div><div style="font-size:10px;color:var(--muted);font-weight:700">Students</div></div>'+
+    '<div class="card" style="text-align:center;padding:12px"><div style="font-size:22px;font-weight:900;color:var(--green)">'+s.teacher_count+'</div><div style="font-size:10px;color:var(--muted);font-weight:700">Teachers</div></div>'+
+    '<div class="card" style="text-align:center;padding:12px"><div style="font-size:22px;font-weight:900;color:var(--gold)">₹'+rev.toLocaleString('en-IN')+'</div><div style="font-size:10px;color:var(--muted);font-weight:700">MRR</div></div>'+
+    '</div>'+
+    '<div class="card" style="margin-bottom:12px"><div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;font-weight:700"><span>📧 '+s.contact_email+'</span><span>📞 '+s.contact_phone+'</span><span>🔑 '+s.school_code+'</span></div></div>'+
+    '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between"><div>Plan: '+planBadge+'</div><div style="font-size:12px;color:var(--muted)">Expires: '+new Date(s.subscription_end).toLocaleDateString('en-IN')+'</div></div></div>'+
+    '<div style="display:flex;gap:9px"><button class="btn-sm btn-green" style="flex:1" onclick="renewSchool(\''+s.name+'\')">↻ Renew Plan</button><button class="btn-sm btn-red" onclick="deactivateSchool(\''+s.name+'\',this)">⛔ Deactivate</button></div>';
+}
+
+function closeSchoolDetail(){ document.getElementById('school-detail').classList.remove('open'); }
+
+function renewSchool(name){
+  showToast('✅ Renewal email sent to '+name,'success');
+}
+function deactivateSchool(name, btn){
+  btn.textContent='✅ Deactivated';
+  btn.disabled=true;
+  showToast('⛔ '+name+' deactivated','error');
+}
+
+/* ── MODALS ── */
+function openAddSchool(){
+  document.getElementById('s-end').value=new Date(Date.now()+365*24*60*60*1000).toISOString().split('T')[0];
+  document.getElementById('add-school-modal').classList.add('open');
+}
+function openAddTeacher(){ document.getElementById('add-teacher-modal').classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+document.getElementById('add-school-modal').addEventListener('click',function(e){if(e.target===this)closeModal('add-school-modal');});
+document.getElementById('add-teacher-modal').addEventListener('click',function(e){if(e.target===this)closeModal('add-teacher-modal');});
+
+function submitAddSchool(){
+  var name=document.getElementById('s-name').value.trim();
+  var code=document.getElementById('s-code').value.trim();
+  if(!name||!code){showToast('⚠️ Please fill School Name and Code','error');return;}
+  var newSchool={id:'new-'+Date.now(),name:name,city:document.getElementById('s-city').value||'',state:document.getElementById('s-state').value||'Maharashtra',contact_email:document.getElementById('s-email').value||'',contact_phone:document.getElementById('s-phone').value||'',student_count:0,teacher_count:0,plan:document.getElementById('s-plan').value,status:'active',subscription_end:document.getElementById('s-end').value,school_code:code};
+  allSchools.unshift(newSchool);
+  renderSchools(allSchools); renderOverview(); renderRevenue();
+  closeModal('add-school-modal');
+  showToast('✅ '+name+' added successfully!','success');
+}
+
+function submitAddTeacher(){
+  var name=document.getElementById('t-name').value.trim();
+  var email=document.getElementById('t-email').value.trim();
+  if(!name||!email){showToast('⚠️ Please fill all fields','error');return;}
+  closeModal('add-teacher-modal');
+  showToast('✅ Teacher '+name+' added!','success');
+}
+
+/* ── TABS ── */
+function tab(name,el){
+  document.querySelectorAll('.tab-page').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  if(el)el.classList.add('active');
+}
+
+/* ── UTILS ── */
+function callClaude(prompt,cb){
+  fetch('https://sopodkkcjtgqfnpsdsai.supabase.co/functions/v1/ai-chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({prompt:prompt,system:'You are a business analyst for StudyBot AI, an Indian EdTech SaaS platform for schools. Give concise, actionable insights.'})
+  }).then(function(r){return r.json();})
+  .then(function(d){cb(d.reply||'Could not get AI response.');})
+  .catch(function(){cb('⚠️ AI unavailable.');});
+}
+
+function showToast(msg,type){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+(type||'success');t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+</script>
+
+<script>
+function mobToggle(){
+  var sb=document.querySelector('.sidebar');
+  var ov=document.getElementById('mob-overlay');
+  if(!sb)return;
+  sb.classList.toggle('mob-open');
+  ov.classList.toggle('show');
+}
+function mobClose(){
+  var sb=document.querySelector('.sidebar');
+  var ov=document.getElementById('mob-overlay');
+  if(sb)sb.classList.remove('mob-open');
+  if(ov)ov.classList.remove('show');
+}
+function mobInit(){
+  var ham=document.getElementById('mob-ham');
+  if(!ham)return;
+  if(window.innerWidth<=768){
+    ham.style.display='flex';
+  } else {
+    ham.style.display='none';
+    var sb=document.querySelector('.sidebar');
+    if(sb)sb.classList.remove('mob-open');
+  }
+}
+// Close sidebar on nav click mobile
+document.addEventListener('click',function(e){
+  if(window.innerWidth<=768 && e.target.closest('.nav-item')){
+    mobClose();
+  }
+});
+window.addEventListener('load',mobInit);
+window.addEventListener('resize',mobInit);
+
+/* ════ MOBILE SIDEBAR ════ */
+(function() {
+  function setupMobile() {
+    if (window.innerWidth > 768) {
+      // Desktop - remove mobile elements
+      var ham = document.getElementById('_ham');
+      var ov = document.getElementById('_sbov');
+      if (ham) ham.style.display = 'none';
+      return;
+    }
+
+    var sidebar = document.querySelector('.sidebar');
+    if (!sidebar) return;
+
+    // Create hamburger if not exists
+    if (!document.getElementById('_ham')) {
+      var btn = document.createElement('button');
+      btn.id = '_ham';
+      btn.className = 'ham-btn';
+      btn.innerHTML = '<span></span><span></span><span></span>';
+      btn.setAttribute('aria-label', 'Menu');
+      btn.onclick = toggleSB;
+      document.body.appendChild(btn);
+    }
+
+    // Create overlay if not exists
+    if (!document.getElementById('_sbov')) {
+      var ov = document.createElement('div');
+      ov.id = '_sbov';
+      ov.className = 'sb-overlay';
+      ov.onclick = closeSB;
+      document.body.appendChild(ov);
+    }
+
+    document.getElementById('_ham').style.display = 'flex';
+  }
+
+  window.toggleSB = function() {
+    var sb = document.querySelector('.sidebar');
+    var ov = document.getElementById('_sbov');
+    if (!sb) return;
+    sb.classList.toggle('sb-open');
+    if (ov) ov.classList.toggle('sb-show');
+  };
+
+  window.closeSB = function() {
+    var sb = document.querySelector('.sidebar');
+    var ov = document.getElementById('_sbov');
+    if (sb) sb.classList.remove('sb-open');
+    if (ov) ov.classList.remove('sb-show');
+  };
+
+  // Close sidebar on nav click (mobile)
+  document.addEventListener('click', function(e) {
+    if (e.target.closest && e.target.closest('.nav-item') && window.innerWidth <= 768) {
+      setTimeout(closeSB, 150);
+    }
+  });
+
+  // Init
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupMobile);
+  } else {
+    setupMobile();
+  }
+  window.addEventListener('resize', setupMobile);
+})();
+
+</script>
+</body>
+</html>
