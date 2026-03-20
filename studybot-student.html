@@ -205,6 +205,14 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .result-big{font-size:60px;font-weight:900;background:linear-gradient(135deg,var(--primary),#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;}
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
 
+/* Image upload */
+.img-preview-box{padding:8px 12px;border-bottom:1px solid var(--border);display:none;align-items:center;gap:10px;}
+.img-preview-box img{width:52px;height:52px;border-radius:10px;object-fit:cover;border:2px solid var(--primary);}
+.img-remove{width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;border:none;cursor:pointer;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;}
+.img-label{font-size:12px;color:var(--muted);font-weight:700;}
+.cam-btn{width:42px;height:42px;border-radius:11px;border:2px solid var(--border);background:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.cam-btn:hover{border-color:var(--primary);background:var(--primary-light);}
+
 /* ── JUNIOR THEME (Class 5-8) ── */
 body.junior{--bg:#fff8f0;--surface:#fff;--border:#ffd0a0;--primary:#ff6b35;--primary-light:#fff3e0;--accent:#ff8f00;--green:#00c853;--green-light:#e8f5e9;--cyan:#00bcd4;--text:#2d1b00;--muted:#8d6e63;--shadow:0 4px 20px rgba(255,107,53,.12);}
 body.junior .sidebar{background:linear-gradient(180deg,#ff6b35,#ff8f00)!important;}
@@ -816,9 +824,22 @@ body.senior .stat-lbl{color:#64748b!important;}
             <div class="msg ai"><div class="msg-av ai-av">🤖</div><div class="bubble">Namaste! 🙏 Ask me any doubt — answered in your language and saved automatically!</div></div>
           </div>
           <div class="chat-foot">
+            <!-- Image Preview -->
+            <div class="img-preview-box" id="img-preview-box">
+              <img id="img-preview-thumb" src="" alt=""/>
+              <div style="flex:1">
+                <div class="img-label" id="img-preview-name">Image selected</div>
+                <div style="font-size:10px;color:var(--muted)">Will be sent with your message</div>
+              </div>
+              <button class="img-remove" onclick="removeImg()">✕</button>
+            </div>
             <div class="inp-row">
               <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">🎤</button>
-              <textarea class="chat-inp" id="doubt-inp" placeholder="Type your doubt..." rows="1" onkeydown="chatKey(event)"></textarea>
+              <label class="cam-btn" title="Send Image">
+                📷
+                <input type="file" id="img-file-input" accept="image/*" style="display:none" onchange="handleImgSelect(event)"/>
+              </label>
+              <textarea class="chat-inp" id="doubt-inp" placeholder="Type your doubt or attach an image..." rows="1" onkeydown="chatKey(event)"></textarea>
               <button class="send-btn" id="send-btn" onclick="sendDoubt()">➤</button>
             </div>
             <div style="font-size:10px;color:var(--muted);font-weight:700;margin-top:6px;text-align:center">🔊 Voice · 📷 Image · Saved to DB</div>
@@ -1551,6 +1572,95 @@ window.addEventListener('resize',mobInit);
   window.addEventListener('resize', setupMobile);
 })();
 
+
+
+/* ════ IMAGE UPLOAD ════ */
+var _imgBase64 = null;
+var _imgMime = null;
+
+function handleImgSelect(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { alert('Image too large! Max 5MB.'); return; }
+  _imgMime = file.type;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var result = ev.target.result;
+    _imgBase64 = result.split(',')[1];
+    var box = document.getElementById('img-preview-box');
+    var thumb = document.getElementById('img-preview-thumb');
+    var name = document.getElementById('img-preview-name');
+    if (box) box.style.display = 'flex';
+    if (thumb) thumb.src = result;
+    if (name) name.textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function removeImg() {
+  _imgBase64 = null; _imgMime = null;
+  var box = document.getElementById('img-preview-box');
+  var thumb = document.getElementById('img-preview-thumb');
+  if (box) box.style.display = 'none';
+  if (thumb) thumb.src = '';
+}
+
+/* Override sendDoubt for image */
+var _origSend = sendDoubt;
+sendDoubt = function() {
+  if (_imgBase64) { sendImgDoubt(); } else { _origSend(); }
+};
+
+function sendImgDoubt() {
+  var inp = document.getElementById('doubt-inp');
+  var q = inp.value.trim() || 'Explain this image for my studies.';
+  inp.value = '';
+  document.getElementById('send-btn').disabled = true;
+
+  // Show user msg with image
+  var msgs = document.getElementById('chat-msgs');
+  var d = document.createElement('div');
+  d.className = 'msg user';
+  d.innerHTML = '<div class="msg-av user-av">' + (currentUser ? currentUser.name[0].toUpperCase() : 'U') + '</div>'
+    + '<div class="bubble"><div>' + esc(q) + '</div>'
+    + '<img src="data:' + _imgMime + ';base64,' + _imgBase64 + '" style="max-width:160px;border-radius:10px;margin-top:7px;display:block"/></div>';
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  var typing = appendTyping();
+  var imgB64 = _imgBase64;
+  var imgMime = _imgMime;
+  removeImg();
+
+  fetch('https://sopodkkcjtgqfnpsdsai.supabase.co/functions/v1/ai-chat', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      prompt: q,
+      system: 'You are StudyBot AI for Indian school students (NCERT). Analyse the image and explain clearly. If it is a question, solve it step by step.',
+      image_base64: imgB64,
+      image_mime: imgMime
+    })
+  }).then(function(r) { return r.json(); })
+  .then(function(data) {
+    var reply = data.reply || 'Could not analyse image.';
+    typing.remove();
+    appendAIMsg(reply);
+    speakText(reply);
+    if (currentUser && authToken) {
+      fetch(BACKEND + '/api/doubts/save', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+        body: JSON.stringify({student_id:currentUser.id,question:'[Image] '+q,answer:reply,language:currentLang,format:'image',subject:'General'})
+      }).then(function(){loadDoubtCount();}).catch(function(){});
+    }
+  }).catch(function() {
+    typing.remove();
+    appendAIMsg('Could not analyse image. Please try again.');
+  });
+  document.getElementById('send-btn').disabled = false;
+}
 
 /* ════ VOICE CALL ════ */
 var callActive = false;
